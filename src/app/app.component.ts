@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -12,14 +12,22 @@ export class AppComponent implements OnInit{
 
   ngOnInit(){
     this.signupForm = new FormGroup({
-      'username': new FormControl(null, Validators.required),  // <--- 1. initial state/value   2. single/array of validators   3. potential asynchronous validators
-      'email': new FormControl(null, [Validators.required, Validators.email]),
-      'gender': new FormControl('male')    // <--- this and the other two are all form controls that will be connected to inputs in the form
+      'userData': new FormGroup({
+        'username': new FormControl(null, Validators.required),  // <--- 1. initial state/value   2. single/array of validators   3. potential asynchronous validators
+        'email': new FormControl(null, [Validators.required, Validators.email])
+      }),
+      'gender': new FormControl('male'),    // <--- this and the other two are all form controls that will be connected to inputs in the form
+      'hobbies': new FormArray([])
     });
   }
 
   onSubmit() {
     console.log(this.signupForm);
+  }
+
+  onAddHobby() {
+    const control = new FormControl(null, Validators.required);
+    (<FormArray>this.signupForm.get('hobbies')).push(control)
   }
 
 }
