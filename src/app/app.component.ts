@@ -1,5 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-root',
@@ -11,19 +12,41 @@ export class AppComponent implements OnInit{
   signupForm: FormGroup;
   forbiddenUsernames = ['Chris','Anna'];
 
+  // constructor(private formBuilder: FormBuilder){}
+
   ngOnInit(){
     this.signupForm = new FormGroup({
       'userData': new FormGroup({
         'username': new FormControl(null, [Validators.required, this.forbiddenNames.bind(this)]),  // <--- 1. initial state/value   2. single/array of validators   3. potential asynchronous validators
-        'email': new FormControl(null, [Validators.required, Validators.email])
+        'email': new FormControl(null, [Validators.required, Validators.email], this.forbiddenEmails)
       }),
       'gender': new FormControl('male'),    // <--- this and the other two are all form controls that will be connected to inputs in the form
       'hobbies': new FormArray([])
+    });
+    // this.signupForm.valueChanges.subscribe(
+    //   (value) => console.log(value)
+    // )
+    this.signupForm.statusChanges.subscribe(
+      (status) => console.log(status)
+    );
+    this.signupForm.setValue({
+      'userData': {
+        'username': 'Max',
+        'email': 'max@test.com'
+      },
+      'gender': 'male',
+      'hobbies': []
+    });
+    this.signupForm.patchValue({
+      'userData': {
+        'username': 'Anna',
+      }
     });
   }
 
   onSubmit() {
     console.log(this.signupForm);
+    this.signupForm.reset();
   }
 
   onAddHobby() {
@@ -36,6 +59,19 @@ export class AppComponent implements OnInit{
       return {'nameIsForbidden': true};
     }
     return null;
+  }
+
+  forbiddenEmails(control: FormControl): Promise<any> | Observable<any> {
+    const promise = new Promise<any>((resolve, reject) => {
+      setTimeout(() => {
+        if(control.value === 'test@test.com') {
+          resolve({'emailIsForbidden': true})
+        } else {
+          resolve(null);
+        }
+      }, 1500)
+    });
+    return promise;
   }
 
 }
